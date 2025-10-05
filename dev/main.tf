@@ -32,7 +32,7 @@ module "cost_report_function" {
   source              = "./modules/lambda"
   function_name       = var.lambda_function_name
   iam_role_arn        = module.lambda_execution_role.role_arn
-  source_code_path    = "../src/lambda/get_cost_report/"
+  source_code_path    = "../src/lambda/get_cost_report"
   depends_on          = [module.ses_email_identity]
   schedule_expression = var.lambda_schedule
   sender_email        = var.notification_email # Using the same email for sender/receiver
