@@ -22,5 +22,5 @@ variable "notification_email" {
   description = "The email address to receive billing notifications."
   type        = string
   # IMPORTANT: Update this with your actual email address
-  default     = "your-email@example.com"
+  default     = "yisakmesifin@gmail.com"
 }
