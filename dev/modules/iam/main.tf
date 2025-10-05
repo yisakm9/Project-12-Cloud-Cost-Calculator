@@ -42,6 +42,15 @@ resource "aws_iam_policy" "lambda_permissions_policy" {
           "logs:PutLogEvents"
         ],
         Resource = "arn:aws:logs:*:*:*"
+      },
+       # This block grants the Lambda function permission to send emails
+      # using the specified SES identity.
+      {
+        Effect   = "Allow",
+        Action   = "ses:SendEmail",
+        Resource = "arn:aws:ses:us-east-1:*:identity/*" # This is a reasonable scope
+        # For stricter security in production, you could scope this down to the specific
+        # identity ARN: "arn:aws:ses:us-east-1:ACCOUNT_ID:identity/your-email@example.com"
       }
     ]
   })
