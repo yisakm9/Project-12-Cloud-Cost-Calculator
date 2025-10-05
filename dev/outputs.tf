@@ -26,3 +26,7 @@ output "dashboard_url" {
   description = "The URL for the cost calculator dashboard."
   value       = module.cost_dashboard_bucket.website_endpoint
 }
+output "s3_bucket_name" {
+  description = "The name of the S3 bucket for the dashboard."
+  value       = module.cost_dashboard_bucket.bucket_name
+}
