@@ -24,3 +24,8 @@ variable "notification_email" {
   # IMPORTANT: Update this with your actual email address
   default     = "yisakmesifin@gmail.com"
 }
+variable "lambda_iam_role_name" {
+  description = "The name for the IAM role to be used by the cost-reporting Lambda function."
+  type        = string
+  default     = "CostReportLambdaRole"
+}

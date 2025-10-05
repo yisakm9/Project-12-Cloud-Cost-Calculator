@@ -17,3 +17,13 @@ module "billing_alarm" {
     ManagedBy = "Terraform"
   }
 }
+
+module "lambda_execution_role" {
+  source      = "./modules/iam"
+  role_name   = var.lambda_iam_role_name
+  policy_name = "${var.lambda_iam_role_name}-policy"
+  tags = {
+    Project   = "CloudCostCalculator"
+    ManagedBy = "Terraform"
+  }
+}
