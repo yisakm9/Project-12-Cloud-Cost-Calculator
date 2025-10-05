@@ -42,9 +42,8 @@ variable "lambda_schedule" {
   #default     = "rate(2 minutes)"  for test
 }
 # New variable for the S3 bucket name
-variable "s3_bucket_name" {
-  description = "The globally unique name for the S3 bucket hosting the dashboard."
+variable "s3_bucket_name_prefix" {
+  description = "The prefix for the S3 bucket name. A random suffix will be appended to ensure uniqueness."
   type        = string
-  # IMPORTANT: S3 bucket names must be globally unique. Change this!
-  default     = "cloud-cost-calculator-dashboard-unique-name"
+  default     = "cloud-cost-calculator-dashboard"
 }

@@ -1,3 +1,7 @@
+resource "random_id" "suffix" {
+  byte_length = 4 # Generates an 8-character hex string
+}
+
 module "cost_alerting_topic" {
   source       = "./modules/sns"
   topic_name   = var.sns_topic_name
@@ -53,8 +57,9 @@ module "ses_email_identity" {
 }
 
 module "cost_dashboard_bucket" {
-  source      = "./modules/s3"
-  bucket_name = var.s3_bucket_name
+  source = "./modules/s3"
+  
+  bucket_name = "${var.s3_bucket_name_prefix}-${random_id.suffix.hex}"  
   tags = {
     Project   = "CloudCostCalculator"
     ManagedBy = "Terraform"
