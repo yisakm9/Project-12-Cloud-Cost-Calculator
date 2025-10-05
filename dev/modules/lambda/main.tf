@@ -1,4 +1,4 @@
-# dev/modules/lambda/main.tf
+#  dev/modules/lambda/main.tf
 
 data "archive_file" "lambda_zip" {
   type        = "zip"
