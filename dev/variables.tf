@@ -41,3 +41,10 @@ variable "lambda_schedule" {
   default     = "cron(0 9 ? * MON *)" # Every Monday at 9:00 AM UTC
   #default     = "rate(2 minutes)"  for test
 }
+# New variable for the S3 bucket name
+variable "s3_bucket_name" {
+  description = "The globally unique name for the S3 bucket hosting the dashboard."
+  type        = string
+  # IMPORTANT: S3 bucket names must be globally unique. Change this!
+  default     = "cloud-cost-calculator-dashboard-unique-name"
+}

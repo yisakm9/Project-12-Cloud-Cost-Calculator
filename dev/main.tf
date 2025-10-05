@@ -51,3 +51,12 @@ module "ses_email_identity" {
     ManagedBy = "Terraform"
   }
 }
+
+module "cost_dashboard_bucket" {
+  source      = "./modules/s3"
+  bucket_name = var.s3_bucket_name
+  tags = {
+    Project   = "CloudCostCalculator"
+    ManagedBy = "Terraform"
+  }
+}

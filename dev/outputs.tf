@@ -22,3 +22,7 @@ output "ses_verified_email_arn" {
   description = "The ARN of the SES email identity. Manual email confirmation is required."
   value       = module.ses_email_identity.identity_arn
 }
+output "dashboard_url" {
+  description = "The URL for the cost calculator dashboard."
+  value       = module.cost_dashboard_bucket.website_endpoint
+}
