@@ -13,3 +13,12 @@ output "lambda_iam_role_arn" {
   description = "The ARN of the IAM role for the Lambda function."
   value       = module.lambda_execution_role.role_arn
 }
+
+output "lambda_function_arn" {
+  description = "The ARN of the cost reporting Lambda function."
+  value       = module.cost_report_function.function_arn
+}
+output "ses_verified_email_arn" {
+  description = "The ARN of the SES email identity. Manual email confirmation is required."
+  value       = module.ses_email_identity.identity_arn
+}
