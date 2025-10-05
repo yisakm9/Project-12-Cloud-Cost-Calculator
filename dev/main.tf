@@ -35,7 +35,7 @@ module "cost_report_function" {
   source_code_path    = abspath("${path.root}/../src/lambda/get_cost_report/")
   depends_on          = [module.ses_email_identity]
   schedule_expression = var.lambda_schedule
-  sender_email        = var.notification_email # Using the same email for sender/receiver
+  sender_email        = var.notification_email # Using the same email  for sender/receiver
   recipient_email     = var.notification_email
   tags = {
     Project   = "CloudCostCalculator"
