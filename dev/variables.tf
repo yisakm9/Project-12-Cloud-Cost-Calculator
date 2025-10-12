@@ -47,3 +47,20 @@ variable "s3_bucket_name_prefix" {
   type        = string
   default     = "cloud-cost-calculator-dashboard"
 }
+variable "api_lambda_iam_role_name" {
+  description = "The name for the IAM role used by the API Lambda."
+  type        = string
+  default     = "GetCostApiLambdaRole"
+}
+
+variable "api_lambda_function_name" {
+  description = "The name of the Lambda function for the API."
+  type        = string
+  default     = "GetCostDataApi"
+}
+
+variable "api_name" {
+  description = "The name of the HTTP API Gateway."
+  type        = string
+  default     = "CostDataAPI"
+}

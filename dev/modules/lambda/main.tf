@@ -26,8 +26,8 @@ resource "aws_lambda_function" "cost_report_lambda" {
   memory_size = 128
   tags        = var.tags
 }
-
 resource "aws_cloudwatch_event_rule" "lambda_schedule" {
+  count               = var.schedule_expression != null ? 1 : 0
   name                = "${var.function_name}-schedule"
   description         = "Triggers the cost report Lambda function"
   schedule_expression = var.schedule_expression
@@ -35,15 +35,17 @@ resource "aws_cloudwatch_event_rule" "lambda_schedule" {
 }
 
 resource "aws_cloudwatch_event_target" "lambda_target" {
-  rule      = aws_cloudwatch_event_rule.lambda_schedule.name
+  count     = var.schedule_expression != null ? 1 : 0
+  rule      = aws_cloudwatch_event_rule.lambda_schedule[0].name
   target_id = var.function_name
   arn       = aws_lambda_function.cost_report_lambda.arn
 }
 
 resource "aws_lambda_permission" "allow_cloudwatch" {
+  count         = var.schedule_expression != null ? 1 : 0
   statement_id  = "AllowExecutionFromCloudWatch"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.cost_report_lambda.function_name
   principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.lambda_schedule.arn
+  source_arn    = aws_cloudwatch_event_rule.lambda_schedule[0].arn
 }

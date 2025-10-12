@@ -65,3 +65,45 @@ module "cost_dashboard_bucket" {
     ManagedBy = "Terraform"
   }
 }
+
+#  IAM module for a different purpose
+module "api_lambda_execution_role" {
+  source      = "./modules/iam"
+  role_name   = var.api_lambda_iam_role_name
+  policy_name = "${var.api_lambda_iam_role_name}-policy"
+  tags = {
+    Project   = "CloudCostCalculator"
+    ManagedBy = "Terraform"
+  }
+}
+
+#  NEW LAMBDA FUNCTION FOR THE API 
+module "get_cost_api_function" {
+  source              = "./modules/lambda"
+  function_name       = var.api_lambda_function_name
+  iam_role_arn        = module.api_lambda_execution_role.role_arn
+  source_code_path    = abspath("${path.root}/../src/lambda/get_cost_api/")
+  
+  # This Lambda is triggered by API Gateway, so schedule is null
+  schedule_expression = null 
+
+  # Environment variables are not needed for this one
+  sender_email    = null
+  recipient_email = null
+  
+  tags = {
+    Project   = "CloudCostCalculator"
+    ManagedBy = "Terraform"
+  }
+}
+
+#  NEW API GATEWAY RESOURCE 
+module "cost_api" {
+  source                 = "./modules/apigateway"
+  api_name               = var.api_name
+  lambda_integration_arn = module.get_cost_api_function.function_arn
+  tags = {
+    Project   = "CloudCostCalculator"
+    ManagedBy = "Terraform"
+  }
+}

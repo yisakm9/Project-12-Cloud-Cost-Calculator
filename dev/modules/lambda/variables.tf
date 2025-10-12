@@ -28,8 +28,9 @@ variable "source_code_path" {
 }
 
 variable "schedule_expression" {
-  description = "The schedule for triggering the Lambda function (cron or rate expression)."
+  description = "The schedule for triggering the Lambda function (cron or rate expression). Null if not scheduled."
   type        = string
+  default     = null # Allow it to be nullable
 }
 
 variable "sender_email" {
