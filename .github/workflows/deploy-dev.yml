@@ -3,6 +3,7 @@
 name: 'Terraform & Frontend CI/CD for Cloud Cost Calculator'
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
