@@ -66,7 +66,7 @@ module "cost_dashboard_bucket" {
   }
 }
 
-#    IAM module for a different purpose
+#     IAM module for a different purpose
 module "api_lambda_execution_role" {
   source      = "./modules/iam"
   role_name   = var.api_lambda_iam_role_name
