@@ -1,51 +1,82 @@
-javascript
-// This file will be used later to fetch and display cost data.
-console.log("Dashboard script loaded.");
 // frontend/public/script.js
 
-// This placeholder will be replaced by the CI/CD pipeline.
+// This placeholder, '%%API_ENDPOINT%%', will be found and replaced by
+// a 'sed' command in the GitHub Actions workflow during the deployment process.
 const API_ENDPOINT = '%%API_ENDPOINT%%';
 
+/**
+ * Main execution function that runs after the DOM is fully loaded.
+ */
 document.addEventListener('DOMContentLoaded', () => {
-    const container = document.getElementById('dashboard-container');
+    const dashboardContainer = document.getElementById('dashboard-container');
 
-    if (API_ENDPOINT === '%%API_ENDPOINT%%') {
-        container.innerHTML = '<h2>Error: API Endpoint not configured.</h2><p>The application has not been deployed correctly.</p>';
-        console.error("API_ENDPOINT has not been replaced by the CI/CD pipeline.");
+    // Fail-safe check: If the placeholder was not replaced, show an error.
+    // This prevents a broken state if the CI/CD pipeline fails to inject the URL.
+    if (API_ENDPOINT === '%%API_ENDPOINT%%' || !API_ENDPOINT) {
+        dashboardContainer.innerHTML = '<h2>Error: API Endpoint Not Configured</h2><p>The application has not been deployed correctly. Please check the CI/CD pipeline configuration.</p>';
+        console.error("API_ENDPOINT placeholder was not replaced. This is a deployment configuration issue.");
         return;
     }
 
-    fetchData(container);
+    // Start the process of fetching and rendering the data.
+    fetchCostData(dashboardContainer);
 });
 
-async function fetchData(container) {
+/**
+ * Fetches cost data from the backend API.
+ * @param {HTMLElement} container - The container element to update with status messages.
+ */
+async function fetchCostData(container) {
     try {
+        // Display a loading message while the data is being fetched.
         container.innerHTML = '<p>Loading cost data...</p>';
         
-        // Fetch data from our API Gateway endpoint
-        const response = await fetch(`${API_ENDPOINT}/costs`, {
+        // Construct the full URL for the API endpoint.
+        const apiUrl = `${API_ENDPOINT}/costs`;
+        console.log(`Fetching data from: ${apiUrl}`);
+
+        // Perform the GET request to our API Gateway.
+        const response = await fetch(apiUrl, {
             method: 'GET',
         });
 
+        // Check if the HTTP response is successful (status code 200-299).
         if (!response.ok) {
-            throw new Error(`API request failed with status ${response.status}`);
+            const errorBody = await response.text();
+            throw new Error(`API request failed with status ${response.status}: ${errorBody}`);
         }
 
+        // Parse the JSON response body.
         const data = await response.json();
-        renderData(data, container);
+        
+        // Pass the successfully fetched data to the rendering function.
+        renderCostData(data, container);
 
     } catch (error) {
+        // If any part of the try block fails, catch the error and display it.
         console.error('Failed to fetch or render data:', error);
-        container.innerHTML = `<h2>Failed to load data</h2><p>${error.message}</p>`;
+        container.innerHTML = `<h2>Failed to Load Cost Data</h2><p>There was an error communicating with the backend API.</p><p><i>Details: ${error.message}</i></p>`;
     }
 }
 
-function renderData(data, container) {
-    let tableRows = data.costsByService
-        .map(item => `<tr><td>${item.service}</td><td class="cost-cell">$${item.cost.toFixed(2)}</td></tr>`)
+/**
+ * Renders the fetched cost data into an HTML table inside the container.
+ * @param {object} data - The cost data object returned from the API.
+ * @param {HTMLElement} container - The container element to render the data into.
+ */
+function renderCostData(data, container) {
+    // Generate an HTML string for each table row using the costsByService array.
+    const tableRows = data.costsByService
+        .map(item => `
+            <tr>
+                <td>${item.service}</td>
+                <td class="cost-cell">$${item.cost.toFixed(2)}</td>
+            </tr>
+        `)
         .join('');
 
-    const html = `
+    // Construct the final HTML for the dashboard.
+    const dashboardHtml = `
         <h2>Weekly Cost Summary</h2>
         <p><b>Reporting Period:</b> ${data.reportingPeriod.start} to ${data.reportingPeriod.end}</p>
         <table class="cost-table">
@@ -66,5 +97,7 @@ function renderData(data, container) {
             </tfoot>
         </table>
     `;
-    container.innerHTML = html;
+
+    // Replace the container's content with the new HTML.
+    container.innerHTML = dashboardHtml;
 }
