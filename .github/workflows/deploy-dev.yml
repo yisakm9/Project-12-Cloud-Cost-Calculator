@@ -3,7 +3,6 @@
 name: 'Terraform & Frontend CI/CD for Cloud Cost Calculator'
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
@@ -27,6 +26,7 @@ jobs:
     env:
       TF_WORKING_DIR: 'dev'
       AWS_REGION: 'us-east-1'
+      # IMPORTANT: Update with your AWS Account ID and the Role name you created
       AWS_ROLE_ARN: arn:aws:iam::456202167790:role/githubaction
 
     outputs:
@@ -57,7 +57,7 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
 
       - name: 'Terraform Apply'
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.ref == 'refs/main' && github.event_name == 'push'
         run: terraform apply -auto-approve
         working-directory: ${{ env.TF_WORKING_DIR }}
 
@@ -81,6 +81,7 @@ jobs:
       S3_BUCKET_NAME: ${{ needs.terraform.outputs.bucket_name }}
       API_ENDPOINT: ${{ needs.terraform.outputs.api_url }}
       AWS_REGION: 'us-east-1'
+      # IMPORTANT: Update with your AWS Account ID and the Role name you created
       AWS_ROLE_ARN: arn:aws:iam::456202167790:role/githubaction
 
     steps:
@@ -93,15 +94,37 @@ jobs:
           role-to-assume: ${{ env.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
       
-      - name: 'Inject API Endpoint URL into JavaScript'
+      - name: 'Inject API Endpoint URL into JavaScript (with Debugging)'
         run: |
-          echo "API Endpoint from Terraform job: ${{ env.API_ENDPOINT }}"
+          echo "--- STARTING VERBOSE DEBUG ---"
+          
+          echo "Step 1: Verifying the Environment Variable received from the Terraform job."
+          # The brackets make it obvious if the variable is empty.
+          echo "API_ENDPOINT value is: [${{ env.API_ENDPOINT }}]"
+
+          echo "Step 2: Verifying the file exists at the expected path."
+          ls -l frontend/public/
+
+          echo "Step 3: Displaying 'script.js' content BEFORE replacement."
+          echo "---------------------------------------------------------"
+          cat frontend/public/script.js
+          echo "---------------------------------------------------------"
+
+          # Fail fast if the variable is empty.
           if [ -z "${{ env.API_ENDPOINT }}" ]; then
-            echo "::error::API_ENDPOINT is empty. Cannot proceed."
+            echo "::error::FATAL: API_ENDPOINT variable is empty. Cannot proceed."
             exit 1
           fi
+
+          echo "Step 4: Running the 'sed' replacement command."
           sed -i "s|%%API_ENDPOINT%%|${{ env.API_ENDPOINT }}|g" frontend/public/script.js
-          echo "API Endpoint injected successfully."
+
+          echo "Step 5: Displaying 'script.js' content AFTER replacement."
+          echo "--------------------------------------------------------"
+          cat frontend/public/script.js
+          echo "--------------------------------------------------------"
+
+          echo "--- DEBUG COMPLETE ---"
 
       - name: 'Deploy static site to S3'
         run: |
