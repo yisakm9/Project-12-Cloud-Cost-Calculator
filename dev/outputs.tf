@@ -30,3 +30,7 @@ output "s3_bucket_name" {
   description = "The name of the S3 bucket for the dashboard."
   value       = module.cost_dashboard_bucket.bucket_name
 }
+output "api_endpoint_url" {
+  description = "The base URL for the Cost Data API Gateway."
+  value       = module.cost_api.api_endpoint
+}
