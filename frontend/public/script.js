@@ -5,21 +5,15 @@ const API_ENDPOINT = '%%API_ENDPOINT%%';
 
 document.addEventListener('DOMContentLoaded', () => {
     const dashboardContainer = document.getElementById('dashboard-container');
-
-    // Fail-safe check: If the placeholder was not replaced, show an error.
-    if (API_ENDPOINT === '%%API_ENDPOINT%%' || !API_ENDPOINT) {
-        dashboardContainer.innerHTML = '<h2>Error: API Endpoint Not Configured</h2><p>The application has not been deployed correctly. Please check the CI/CD pipeline configuration.</p>';
-        console.error("API_ENDPOINT placeholder was not replaced. This is a deployment configuration issue.");
-        return;
-    }
-
     fetchCostData(dashboardContainer);
 });
 
 async function fetchCostData(container) {
+    // If the placeholder is still present, this fetch will fail and be caught by the catch block.
+    const apiUrl = `${API_ENDPOINT}/costs`;
+
     try {
         container.innerHTML = '<p>Loading cost data...</p>';
-        const apiUrl = `${API_ENDPOINT}/costs`;
         console.log(`Fetching data from: ${apiUrl}`);
 
         const response = await fetch(apiUrl, { method: 'GET' });
@@ -33,7 +27,7 @@ async function fetchCostData(container) {
         renderCostData(data, container);
     } catch (error) {
         console.error('Failed to fetch or render data:', error);
-        container.innerHTML = `<h2>Failed to Load Cost Data</h2><p>There was an error communicating with the backend API.</p><p><i>Details: ${error.message}</i></p>`;
+        container.innerHTML = `<h2>Failed to Load Cost Data</h2><p>There was an error communicating with the backend API.</p><p><i>Details: ${error.message}</i></p><p>Please ensure the CI/CD pipeline has configured the API endpoint correctly.</p>`;
     }
 }
 
