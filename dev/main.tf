@@ -84,10 +84,8 @@ module "get_cost_api_function" {
   iam_role_arn        = module.api_lambda_execution_role.role_arn
   source_code_path    = abspath("${path.root}/../src/lambda/get_cost_api/")
   
-  # This Lambda is triggered by API Gateway, so schedule is null
+  
   schedule_expression = null 
-
-  # Environment variables are not needed for this one
   sender_email    = null
   recipient_email = null
   
