@@ -9,10 +9,12 @@ on:
     paths:
       - 'dev/**'
       - 'frontend/public/**'
+      - 'src/lambda/**'
   pull_request:
     paths:
       - 'dev/**'
       - 'frontend/public/**'
+      - 'src/lambda/**'
 
 permissions:
   id-token: write # Required for OIDC
