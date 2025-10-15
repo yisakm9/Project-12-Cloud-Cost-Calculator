@@ -3,7 +3,7 @@
 data "archive_file" "lambda_zip" {
   type        = "zip"
   source_dir  = var.source_code_path
-  output_path = "${path.module}/lambda_function.zip"
+  output_path = "${path.module}/${var.function_name}.zip"
 }
 
 resource "aws_lambda_function" "cost_report_lambda" {
