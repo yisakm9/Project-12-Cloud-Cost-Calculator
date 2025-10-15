@@ -38,8 +38,8 @@ variable "lambda_function_name" {
 variable "lambda_schedule" {
   description = "Cron expression for how often the Lambda should run."
   type        = string
-  # default     = "cron(0 9 ? * MON *)" # Every Monday at 9:00 AM UTC
-   default     = "rate(2 minutes)"  # for test
+   default     = "cron(0 9 ? * MON *)" # Every Monday at 9:00 AM UTC
+   # default     = "rate(2 minutes)"  # for test
 }
 # New variable for the S3 bucket name
 variable "s3_bucket_name_prefix" {
