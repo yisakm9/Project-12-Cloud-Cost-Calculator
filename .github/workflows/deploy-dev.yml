@@ -6,15 +6,10 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'dev/**'
-      - 'frontend/public/**'
-      - 'src/lambda/**'
+    
   pull_request:
-    paths:
-      - 'dev/**'
-      - 'frontend/public/**'
-      - 'src/lambda/**'
+    branches:
+      - main
 
 permissions:
   id-token: write # Required for OIDC
@@ -28,10 +23,10 @@ jobs:
     env:
       TF_WORKING_DIR: 'dev'
       AWS_REGION: 'us-east-1'
-      #  AWS Account ID and the Role name 
+      # IMPORTANT: Update with your AWS Account ID and the Role name you created
       AWS_ROLE_ARN: arn:aws:iam::456202167790:role/githubaction
 
-    # Expose outputs to other jobs in the workflow
+    # Expose outputs to be used by other jobs in the workflow
     outputs:
       bucket_name: ${{ steps.set-tf-outputs.outputs.bucket_name }}
       api_url: ${{ steps.set-tf-outputs.outputs.api_url }}
@@ -49,13 +44,25 @@ jobs:
       - name: 'Setup Terraform'
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: '1.13.1'
+          terraform_version: '1.13.4' # Pinning version for consistency
 
-      - name: 'Terraform Format Check'
-        id: fmt
-        run: terraform fmt 
+      - name: 'Setup TFLint'
+        uses: terraform-linters/setup-tflint@v6
+        with:
+          tflint_version: latest
+
+      - name: 'Run TFLint'
+        run: tflint --recursive
         working-directory: ${{ env.TF_WORKING_DIR }}
-        continue-on-error: true
+
+      - name: 'Run Checkov Security Scan'
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: ${{ env.TF_WORKING_DIR }}
+          framework: terraform
+          # soft_fail: true allows the pipeline to continue while still reporting findings.
+          # For a strict production pipeline, set this to 'false'.
+          soft_fail: true
 
       - name: 'Terraform Init'
         id: init
@@ -69,7 +76,7 @@ jobs:
 
       - name: 'Terraform Plan (for Pull Requests)'
         id: plan
-        
+        if: github.event_name == 'pull_request' || (github.ref == 'refs/heads/main' && github.event_name == 'push')
         run: terraform plan -no-color
         working-directory: ${{ env.TF_WORKING_DIR }}
 
