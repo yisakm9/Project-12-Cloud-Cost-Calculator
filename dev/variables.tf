@@ -1,10 +1,10 @@
 # dev/variables.tf
 
-variable "aws_region" {
-  description = "The AWS region where resources will be created."
-  type        = string
-  default     = "us-east-1" # Billing metrics are only available in  us-east-1
-}
+#variable "aws_region" {
+#  description = "The AWS region where resources will be created."
+#  type        = string
+#  default     = "us-east-1" # Billing metrics are only available in  us-east-1
+# }
 
 variable "billing_alarm_threshold" {
   description = "The threshold for the billing alarm in USD."
