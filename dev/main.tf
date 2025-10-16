@@ -50,10 +50,10 @@ module "cost_report_function" {
 module "ses_email_identity" {
   source        = "./modules/ses"
   email_address = var.notification_email
-  tags = {
-    Project   = "CloudCostCalculator"
-    ManagedBy = "Terraform"
-  }
+  # tags = {
+  # Project   = "CloudCostCalculator"
+  #   ManagedBy = "Terraform"
+  # }
 }
 
 module "cost_dashboard_bucket" {
