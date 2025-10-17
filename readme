@@ -1,0 +1,202 @@
+
+# Automated AWS Cost Calculator & Alerting System
+
+> An end-to-end, serverless web application that provides real-time AWS cost monitoring, budget alerting, and a dynamic frontend dashboard. This project is fully managed by Infrastructure as Code (Terraform) and deployed via a professional CI/CD pipeline with integrated security scanning.
+
+![AWS Cost Dashboard Screenshot](./dashboard  Screenshot.png) 
+
+
+# The Problem
+
+Businesses using the cloud often face a significant challenge: surprise bills. Without constant, detailed monitoring, it's easy for costs to spiral out of control due to a forgotten resource or unexpected usage. Understanding *what* services are contributing to the cost requires manual effort and can be difficult for non-technical stakeholders to interpret.
+
+# The Solution
+
+This project solves the problem by providing a two-part automated system:
+
+1.  Proactive Alerting: A real-time alerting mechanism that sends an immediate email notification if spending exceeds a predefined budget, allowing for instant intervention.
+2.  Dynamic Visibility: A secure, public-facing web dashboard that displays a clear, user-friendly breakdown of weekly costs by service. This provides at-a-glance visibility for anyone, from engineers to managers.
+
+The entire system is built on a serverless, event-driven architecture, ensuring it is highly scalable and extremely cost-effective.
+
+
+
+# Key Features
+
+*  Automated Budget Alerts: Uses CloudWatch Alarms and SNS to send email alerts when a cost threshold is breached.
+*  Dynamic Frontend Dashboard: A static website hosted on a secure CloudFront CDN that fetches and displays live cost data from a serverless backend.
+*  Serverless API Backend: A highly scalable and secure API built with API Gateway and Lambda, which provides cost data without exposing any AWS credentials.
+*  Automated Weekly Reports: A scheduled Lambda function generates and emails a user-friendly HTML cost report every week.
+*  Infrastructure as Code (IaC): The entire cloud infrastructure is defined declaratively using Terraform, enabling repeatable, version-controlled deployments.
+*  Automated CI/CD Pipeline: A complete GitHub Actions workflow for linting, security scanning, planning, and deploying both the infrastructure and the frontend application.
+*  Security Hardened: The architecture has been hardened based on `checkov` static analysis findings, incorporating best practices like private S3 buckets, CloudFront OAI, KMS encryption, and least-privilege IAM roles.
+
+
+
+# Architecture Diagram
+
+This system is composed of several interconnected AWS services, orchestrated by our CI/CD pipeline.
+
+```mermaid
+graph TD
+    subgraph "CI/CD Pipeline (GitHub Actions)"
+        direction LR
+        A[Git Push on Main] --> B{Run TFLint & Checkov};
+        B --> C{Terraform Plan & Apply};
+        C --> D[Deploy Infrastructure];
+        D --> E{Inject API URL};
+        E --> F[Sync Frontend to S3];
+    end
+
+    subgraph "AWS Infrastructure"
+        direction TB
+        
+        subgraph "Frontend"
+            U[User Browser] --> CF[CloudFront Distribution];
+            CF --> S3[S3 Bucket (Private)];
+        end
+
+        subgraph "API Backend"
+            CF -- "/costs request" --> APIGW[API Gateway];
+            APIGW -- "Invokes" --> LambdaAPI[GetCostDataApi Lambda];
+            LambdaAPI -- "GetCostAndUsage()" --> CE[AWS Cost Explorer];
+            CE -- "Cost Data (JSON)" --> LambdaAPI;
+            LambdaAPI -- "JSON Response" --> APIGW;
+            APIGW -- "JSON Response" --> CF;
+        end
+
+        subgraph "Alerting & Reporting"
+            CWAlarm[CloudWatch Billing Alarm] -- "Threshold Breach" --> SNS[SNS Topic];
+            SNS -- "Alert Email" --> UserEmail[User Email];
+            
+            CWEvent[CloudWatch Event (Cron)] -- "Triggers Weekly" --> LambdaReport[GetWeeklyCostReport Lambda];
+            LambdaReport -- "GetCostAndUsage()" --> CE;
+            CE -- "Cost Data" --> LambdaReport;
+            LambdaReport -- "Sends Report" --> SES[SES Mail Service];
+            SES -- "Formatted Report Email" --> UserEmail;
+        end
+    end
+
+    style S3 fill:#FF9900,stroke:#333,stroke-width:2px
+    style CF fill:#FF9900,stroke:#333,stroke-width:2px
+    style APIGW fill:#D92231,stroke:#333,stroke-width:2px
+    style LambdaAPI fill:#F58536,stroke:#333,stroke-width:2px
+    style LambdaReport fill:#F58536,stroke:#333,stroke-width:2px
+    style CE fill:#232F3E,stroke:#fff,stroke-width:2px,color:#fff
+    style CWAlarm fill:#5A6B86,stroke:#333,stroke-width:2px,color:#fff
+    style CWEvent fill:#5A6B86,stroke:#333,stroke-width:2px,color:#fff
+    style SNS fill:#D92231,stroke:#333,stroke-width:2px
+    style SES fill:#D92231,stroke:#333,stroke-width:2px
+
+
+
+
+# Tech Stack
+
+*   Infrastructure as Code: Terraform
+*   CI/CD:** GitHub Actions
+*   Static Code Analysis: TFLint (Linter), Checkov (Security Scanner)
+*   AWS Services:
+       Compute: AWS Lambda
+       Storage: Amazon S3
+       Networking & CDN: Amazon API Gateway, Amazon CloudFront
+       Monitoring & Events: Amazon CloudWatch (Alarms, Logs, Events)
+       Messaging & Notifications: Amazon SNS, Amazon SES
+       Security & Identity: AWS IAM, AWS KMS
+       Cost Management: AWS Cost Explorer
+*  Frontend: HTML, CSS, vanilla JavaScript
+
+## Project Structure
+
+
+.
+├── .github/workflows/         # Contains CI/CD pipeline definitions (deploy and destroy)
+├── dev/                       # Root directory for our Terraform environment
+│   ├── main.tf                # Main orchestration file (module calls)
+│   ├── variables.tf           # Root input variables
+│   ├── outputs.tf             # Root outputs (dashboard URL, etc.)
+│   ├── versions.tf            # Provider and Terraform version constraints
+│   └── modules/               # Reusable Terraform modules for each component
+│       ├── apigateway/
+│       ├── cloudfront/
+│       ├── cloudwatch/
+│       ├── iam/
+│       ├── kms/
+│       ├── lambda/
+│       ├── s3/
+│       └── ses/
+├── frontend/                  # Contains the static website files
+│   └── public/
+│       ├── index.html
+│       ├── style.css
+│       └── script.js
+├── src/                       # Contains the source code for Lambda functions
+│   └── lambda/
+│       ├── get_cost_api/      # Code for the API Lambda
+│       └── get_cost_report/   # Code for the weekly email report Lambda
+└── .tflint.hcl                # Configuration file for the TFLint linter
+
+ Setup and Deployment
+
+This project is designed for fully automated deployment.
+
+ Prerequisites
+
+1.  An AWS Account.
+2.  A GitHub Account.
+3.  Fork this repository.
+4.  Terraform CLI installed locally (for local testing).
+
+ 1. AWS Configuration (Manual Steps)
+
+*   Create an IAM Role for GitHub Actions (OIDC):
+    *   Follow the [official AWS guide](https://docs.aws.amazon.com/iam/latest/userguide/id_roles_providers_create_oidc.html) to create an OIDC provider in IAM for GitHub Actions.
+    *   Create an IAM Role (e.g., `GitHubActionsRole`) that trusts this provider and attach the `AdministratorAccess` policy. Note: For a production environment, you would scope these permissions down significantly.
+    *   Copy the ARN of this new role.
+
+  Enable Billing Alerts:
+    *   In the AWS Console, navigate to the **Billing and Cost Management** dashboard.
+    *   Go to **Billing preferences** and check the box for **"Receive Billing Alerts"**. This is required for the CloudWatch billing alarm to function.
+
+*   Verify an Email Identity in SES:
+    *   Navigate to the **Amazon SES console**.
+    *   Go to **Verified identities** and create a new identity for the email address you want to send reports *from*.
+    *   You will receive a verification email. Click the link to confirm.
+
+ 2. GitHub Configuration
+
+*   In your forked repository, go to Settings > Secrets and variables > Actions.
+*   You do not need to create any secrets, as we are using OIDC. However, you must replace the placeholder ARN in the workflow files.
+*   IMPORTANT: In both `.github/workflows/terraform-deploy.yml` and `.github/workflows/terraform-destroy.yml`, find the `AWS_ROLE_ARN` environment variable and replace the placeholder value with the ARN of the IAM Role you created in the previous step.
+
+ 3. Deployment
+
+1.  Commit and push your changes to the `main` branch.
+2.  The `terraform-deploy.yml` workflow will automatically trigger.
+3.  The pipeline will first run the `terraform` job to deploy all AWS infrastructure.
+4.  Upon successful completion, the `deploy-frontend` job will run, injecting the new API Gateway URL into the JavaScript file and syncing the files to S3.
+5.  Check the workflow's output for the `dashboard_url`.
+
+
+
+# CI/CD Workflows
+
+# terraform-deploy.yml
+*   Trigger: Push to `main` or Pull Request to `main`.
+*   Jobs:
+    1.`terraform`: Lints and scans the code, then validates, plans, and applies the Terraform configuration. On a PR, it posts the plan as a comment.
+    2.`deploy-frontend`: (Runs only on `main` push) Waits for the `terraform` job to succeed, then injects the live API URL into the `script.js` file and syncs the `frontend/public` directory to the S3 bucket.
+
+# terraform-destroy.yml
+* Trigger: Manual (`workflow_dispatch`) only.
+* Safety: Requires the user to type the word "destroy" to confirm.
+* Action: Runs `terraform destroy` to cleanly tear down all infrastructure managed by Terraform in the `dev` workspace.
+
+
+
+ Future Improvements
+
+* More Granular Cost Data: The Lambda functions could be enhanced to group costs by usage type or by resource tags.
+* User Authentication: Implement Amazon Cognito to add a login system to the dashboard, allowing different users to see     different cost reports.
+* WAF Integration: Add AWS WAF to the CloudFront distribution to protect against common web exploits.
+* Advanced Frontend: Replace the simple HTML table with a charting library (like Chart.js) to visualize cost trends over time.
