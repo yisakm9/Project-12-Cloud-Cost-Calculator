@@ -66,7 +66,6 @@ module "ses_email_identity" {
 
 module "cost_dashboard_bucket" {
   source = "./modules/s3"
-  cloudfront_oai_iam_arn = module.cloudfront_distribution.oai_iam_arn
   bucket_name = "${var.s3_bucket_name_prefix}-${random_id.suffix.hex}"  
   tags = {
     Project   = "CloudCostCalculator"
@@ -154,4 +153,25 @@ module "cloudfront_distribution" {
 
   # Explicitly tell Terraform to create the S3 bucket before the CloudFront distribution
   depends_on = [module.cost_dashboard_bucket]
+}
+
+# --- ADD THIS NEW RESOURCE BLOCK ---
+# This bucket policy is now in the root module, where it can access outputs
+# from both the S3 and CloudFront modules, breaking the dependency cycle.
+resource "aws_s3_bucket_policy" "dashboard_bucket_policy" {
+  bucket = module.cost_dashboard_bucket.bucket_name
+  policy = jsonencode({
+    Version   = "2012-10-17",
+    Statement = [
+      {
+        Sid       = "AllowCloudFrontOAI",
+        Effect    = "Allow",
+        Principal = {
+          AWS = module.cloudfront_distribution.oai_iam_arn
+        },
+        Action    = "s3:GetObject",
+        Resource  = "${module.cost_dashboard_bucket.bucket_arn}/*"
+      }
+    ]
+  })
 }
