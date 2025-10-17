@@ -21,7 +21,7 @@ resource "aws_cloudwatch_log_group" "api_logs" {
   # CKV_AWS_338: Set retention to at least one year
   retention_in_days = 30
    # CKV_AWS_158: Encrypt the log group with the default AWS-managed key for logs.
-  kms_key_id        = "arn:aws:kms:${var.aws_region}:${var.aws_account_id}:alias/aws/logs"
+  kms_key_id = var.log_group_kms_key_arn
   tags              = var.tags
 }
 
