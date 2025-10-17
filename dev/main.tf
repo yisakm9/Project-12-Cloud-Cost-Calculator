@@ -66,7 +66,7 @@ module "ses_email_identity" {
 
 module "cost_dashboard_bucket" {
   source = "./modules/s3"
-  
+  cloudfront_oai_iam_arn = module.cloudfront_distribution.oai_iam_arn
   bucket_name = "${var.s3_bucket_name_prefix}-${random_id.suffix.hex}"  
   tags = {
     Project   = "CloudCostCalculator"
@@ -141,4 +141,19 @@ module "sqs_kms_key" {
   alias_name  = "sqs-dlq-key"
   description = "KMS key for encrypting SQS DLQs"
   tags        = { Project = "CloudCostCalculator" }
+}
+
+# Create the CloudFront distribution
+module "cloudfront_distribution" {
+  source                         = "./modules/cloudfront"
+  s3_bucket_regional_domain_name = module.cost_dashboard_bucket.bucket_regional_domain_name
+  s3_bucket_arn                  = module.cost_dashboard_bucket.bucket_arn
+  
+  tags = {
+    Project   = "CloudCostCalculator"
+    ManagedBy = "Terraform"
+  }
+
+  # Explicitly tell Terraform to create the S3 bucket before the CloudFront distribution
+  depends_on = [module.cost_dashboard_bucket]
 }
