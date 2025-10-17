@@ -51,3 +51,8 @@ variable "environment_variables" {
   type        = map(string)
   default     = {}
 }
+variable "sqs_kms_key_arn" {
+  description = "The ARN of the KMS key to use for encrypting the SQS DLQ."
+  type        = string
+  default     = null
+}

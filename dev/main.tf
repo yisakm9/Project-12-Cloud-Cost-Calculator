@@ -43,6 +43,7 @@ module "cost_report_function" {
   depends_on          = [module.ses_email_identity]
   schedule_expression = var.lambda_schedule
   kms_key_arn         = module.lambda_kms_key.key_arn
+  sqs_kms_key_arn = module.sqs_kms_key.key_arn
   
   environment_variables = {
     SENDER_EMAIL    = var.notification_email
@@ -93,6 +94,7 @@ module "get_cost_api_function" {
   iam_role_arn        = module.api_lambda_execution_role.role_arn
   source_code_path    = abspath("${path.root}/../src/lambda/get_cost_api/")
   kms_key_arn         = module.lambda_kms_key.key_arn
+  sqs_kms_key_arn     = module.sqs_kms_key.key_arn
   schedule_expression = null 
   
   # The invalid arguments are removed.
@@ -134,4 +136,10 @@ module "logs_kms_key" {
   allow_cloudwatch_logs = true
   
   tags = { Project = "CloudCostCalculator" }
+}
+module "sqs_kms_key" {
+  source      = "./modules/kms"
+  alias_name  = "sqs-dlq-key"
+  description = "KMS key for encrypting SQS DLQs"
+  tags        = { Project = "CloudCostCalculator" }
 }

@@ -10,8 +10,8 @@ data "archive_file" "lambda_zip" {
 resource "aws_sqs_queue" "lambda_dlq" {
   count             = var.function_name != null ? 1 : 0
   name              = "${var.function_name}-dlq"
-  # CKV_AWS_27: Add server-side encryption
-  kms_master_key_id = "alias/aws/sqs"
+  # CKV2_AWS_73: Use the provided Customer-Managed Key instead of the AWS-managed key.
+  kms_master_key_id = var.sqs_kms_key_arn
   tags              = var.tags
 }
 
