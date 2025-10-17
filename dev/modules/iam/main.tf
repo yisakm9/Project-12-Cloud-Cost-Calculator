@@ -26,6 +26,7 @@ resource "aws_iam_policy" "lambda_permissions_policy" {
   policy      = jsonencode({
     Version   = "2012-10-17",
     Statement = [
+      # Permission to read from Cost Explorer (read-only, "*" is acceptable here)
       {
         Effect   = "Allow",
         Action   = [
@@ -33,6 +34,7 @@ resource "aws_iam_policy" "lambda_permissions_policy" {
         ],
         Resource = "*"
       },
+      # Permission to write logs to any log group
       {
         Effect   = "Allow",
         Action   = [
@@ -42,20 +44,22 @@ resource "aws_iam_policy" "lambda_permissions_policy" {
         ],
         Resource = "arn:aws:logs:*:*:*"
       },
+      # Permission to send email from any verified identity in the region
       {
         Effect   = "Allow",
         Action   = "ses:SendEmail",
         Resource = "arn:aws:ses:us-east-1:*:identity/*"
       },
-      # --- ADD THIS NEW PERMISSION BLOCK ---
-      # This grants the Lambda function permission to send messages to any SQS queue.
-      # This permission is required for the Dead Letter Queue (DLQ) functionality to work.
+      # --- UPDATED PERMISSION BLOCK FOR DLQ ---
+      # This conditionally grants permission to send messages ONLY to the specific SQS DLQ.
+      # This resolves CKV_AWS_290 and CKV_AWS_355.
       {
-        Effect   = "Allow",
+        Sid      = "AllowSendMessageToDLQ",
+        Effect   = var.sqs_dlq_arn != null ? "Allow" : "Deny", # Only allow if a DLQ ARN is provided
         Action   = "sqs:SendMessage",
-        Resource = "*" # Scoped to all SQS queues for this project's simplicity.
+        Resource = var.sqs_dlq_arn
       }
-      # --- END ADDITION ---
+      # --- END UPDATE ---
     ]
   })
   tags = var.tags

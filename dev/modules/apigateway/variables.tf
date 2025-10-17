@@ -15,3 +15,12 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+variable "aws_account_id" {
+  description = "The AWS Account ID where the resources are deployed."
+  type        = string
+}
+
+variable "aws_region" {
+  description = "The AWS Region where the resources are deployed."
+  type        = string
+}

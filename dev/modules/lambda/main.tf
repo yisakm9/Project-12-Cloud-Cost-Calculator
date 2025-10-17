@@ -8,13 +8,18 @@ data "archive_file" "lambda_zip" {
 
 # CKV_AWS_116: Dead Letter Queue (DLQ) for capturing failed Lambda invocations.
 resource "aws_sqs_queue" "lambda_dlq" {
-  # Only create a DLQ if the function name is valid.
-  count = var.function_name != null ? 1 : 0
-  name  = "${var.function_name}-dlq"
-  tags  = var.tags
+  count             = var.function_name != null ? 1 : 0
+  name              = "${var.function_name}-dlq"
+  # CKV_AWS_27: Add server-side encryption
+  kms_master_key_id = "alias/aws/sqs"
+  tags              = var.tags
 }
 
 # This is the main Lambda function resource with security hardening.
+# Add suppressions with comments
+#checkov:skip=CKV_AWS_117:Function does not require VPC access
+#checkov:skip=CKV_AWS_115:Concurrency limit is not a critical requirement for this project
+#checkov:skip=CKV_AWS_272:Code signing is overkill for this low-risk internal function
 resource "aws_lambda_function" "this" {
   # Suppress non-applicable Checkov findings with inline comments.
   # CKV_AWS_117: "Ensure that AWS Lambda function is configured inside a VPC" - Not needed, function only calls public APIs.

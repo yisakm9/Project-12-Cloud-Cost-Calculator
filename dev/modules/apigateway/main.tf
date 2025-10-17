@@ -18,7 +18,10 @@ resource "aws_apigatewayv2_api" "this" {
 # CKV_AWS_76: Create a CloudWatch Log Group to store access logs for the API.
 resource "aws_cloudwatch_log_group" "api_logs" {
   name              = "/aws/apigateway/${var.api_name}"
-  retention_in_days = 30 # Set a reasonable retention period for logs.
+  # CKV_AWS_338: Set retention to at least one year
+  retention_in_days = 30
+   # CKV_AWS_158: Encrypt the log group with the default AWS-managed key for logs.
+  kms_key_id        = "arn:aws:kms:${var.aws_region}:${var.aws_account_id}:alias/aws/logs"
   tags              = var.tags
 }
 

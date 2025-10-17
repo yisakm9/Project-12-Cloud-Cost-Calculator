@@ -1,3 +1,10 @@
+
+# Dynamically discover the AWS Account ID of the caller.
+data "aws_caller_identity" "current" {}
+
+# Dynamically discover the AWS Region from the provider configuration.
+data "aws_region" "current" {}
+
 resource "random_id" "suffix" {
   byte_length = 4 # Generates an 8-character hex string
 }
@@ -26,6 +33,7 @@ module "lambda_execution_role" {
   source      = "./modules/iam"
   role_name   = var.lambda_iam_role_name
   policy_name = "${var.lambda_iam_role_name}-policy"
+  sqs_dlq_arn = module.cost_report_function.dlq_arn
   tags = {
     Project   = "CloudCostCalculator"
     ManagedBy = "Terraform"
@@ -76,6 +84,7 @@ module "api_lambda_execution_role" {
   source      = "./modules/iam"
   role_name   = var.api_lambda_iam_role_name
   policy_name = "${var.api_lambda_iam_role_name}-policy"
+  sqs_dlq_arn = module.get_cost_api_function.dlq_arn
   tags = {
     Project   = "CloudCostCalculator"
     ManagedBy = "Terraform"
@@ -104,6 +113,11 @@ module "cost_api" {
   source                 = "./modules/apigateway"
   api_name               = var.api_name
   lambda_integration_arn = module.get_cost_api_function.function_arn
+  
+  # Pass the discovered values into the module
+  aws_account_id         = data.aws_caller_identity.current.account_id
+  aws_region             = data.aws_region.current.name
+  
   tags = {
     Project   = "CloudCostCalculator"
     ManagedBy = "Terraform"

@@ -11,3 +11,7 @@ output "function_name" {
   # --- USE THE CORRECT RESOURCE NAME 'this' ---
   value       = aws_lambda_function.this.function_name
 }
+output "dlq_arn" {
+  description = "The ARN of the SQS Dead Letter Queue."
+  value       = one(aws_sqs_queue.lambda_dlq[*].arn) # Use the `one()` function to handle the count
+}

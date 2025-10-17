@@ -27,3 +27,9 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "sqs_dlq_arn" {
+  description = "The ARN of the SQS DLQ for SendMessage permissions. Can be null."
+  type        = string
+  default     = null
+}
