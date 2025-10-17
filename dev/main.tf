@@ -68,6 +68,7 @@ module "cost_dashboard_bucket" {
   source                 = "./modules/s3"
   bucket_name            = "${var.s3_bucket_name_prefix}-${random_id.suffix.hex}"
   cloudfront_oai_iam_arn = module.cloudfront_distribution.oai_iam_arn
+
   
   # --- ADD THIS LINE ---
   logging_bucket_id      = aws_s3_bucket.logging_bucket.id
