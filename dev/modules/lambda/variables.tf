@@ -33,15 +33,7 @@ variable "schedule_expression" {
   default     = null # Allow it to be nullable
 }
 
-variable "sender_email" {
-  description = "The SES-verified email address for sending reports."
-  type        = string
-}
 
-variable "recipient_email" {
-  description = "The email address to receive the cost reports."
-  type        = string
-}
 
 variable "tags" {
   description = "A map of tags to assign to the resources."
