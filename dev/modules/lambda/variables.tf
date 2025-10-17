@@ -48,3 +48,14 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+variable "kms_key_arn" {
+  description = "The ARN of the KMS key for encrypting environment variables."
+  type        = string
+  default     = null # Make it optional
+}
+# Also update the environment variables to be a map
+variable "environment_variables" {
+  description = "A map of environment variables for the Lambda function."
+  type        = map(string)
+  default     = {}
+}

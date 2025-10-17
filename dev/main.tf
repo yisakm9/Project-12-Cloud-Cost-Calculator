@@ -41,6 +41,11 @@ module "cost_report_function" {
   schedule_expression = var.lambda_schedule
   sender_email        = var.notification_email  # Using the same email  for sender/receiver
   recipient_email     = var.notification_email
+  kms_key_arn = module.lambda_kms_key.key_arn
+  environment_variables = {
+      SENDER_EMAIL    = var.notification_email
+      RECIPIENT_EMAIL = var.notification_email
+  }
   tags = {
     Project   = "CloudCostCalculator"
     ManagedBy = "Terraform"
@@ -83,7 +88,7 @@ module "get_cost_api_function" {
   function_name       = var.api_lambda_function_name
   iam_role_arn        = module.api_lambda_execution_role.role_arn
   source_code_path    = abspath("${path.root}/../src/lambda/get_cost_api/")
-  
+  kms_key_arn = module.lambda_kms_key.key_arn
   
   schedule_expression = null 
   sender_email    = null
@@ -104,4 +109,11 @@ module "cost_api" {
     Project   = "CloudCostCalculator"
     ManagedBy = "Terraform"
   }
+}
+
+module "lambda_kms_key" {
+  source      = "./modules/kms"
+  alias_name  = "lambda-env-key"
+  description = "KMS key for encrypting Lambda environment variables"
+  tags        = { Project = "CloudCostCalculator" }
 }
