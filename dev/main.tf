@@ -88,18 +88,17 @@ module "get_cost_api_function" {
   function_name       = var.api_lambda_function_name
   iam_role_arn        = module.api_lambda_execution_role.role_arn
   source_code_path    = abspath("${path.root}/../src/lambda/get_cost_api/")
-  kms_key_arn = module.lambda_kms_key.key_arn
-  
+  kms_key_arn         = module.lambda_kms_key.key_arn
   schedule_expression = null 
-  sender_email    = null
-  recipient_email = null
+  
+  # The invalid arguments are removed.
+  # No `environment_variables` argument is needed because the default empty map is sufficient.
   
   tags = {
     Project   = "CloudCostCalculator"
     ManagedBy = "Terraform"
   }
 }
-
 #  NEW API GATEWAY RESOURCE 
 module "cost_api" {
   source                 = "./modules/apigateway"
