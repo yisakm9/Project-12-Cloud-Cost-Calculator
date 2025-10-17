@@ -1,5 +1,4 @@
 
-
 resource "random_id" "suffix" {
   byte_length = 4 # Generates an 8-character hex string
 }
