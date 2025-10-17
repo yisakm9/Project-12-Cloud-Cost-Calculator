@@ -191,7 +191,22 @@ resource "aws_s3_bucket" "logging_bucket" {
     ManagedBy = "Terraform"
   }
 }
+# 1. Ownership Controls: Set the object ownership to 'BucketOwnerPreferred'.
+# This is a prerequisite for enabling ACLs for this use case.
+resource "aws_s3_bucket_ownership_controls" "logging_bucket_oc" {
+  bucket = aws_s3_bucket.logging_bucket.id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
 
+# 2. ACL Configuration: Explicitly set the ACL to 'private'.
+# This enables ACLs on the bucket, which is required by the CloudFront logging service.
+resource "aws_s3_bucket_acl" "logging_bucket_acl" {
+  bucket = aws_s3_bucket.logging_bucket.id
+  acl    = "private"
+  depends_on = [aws_s3_bucket_ownership_controls.logging_bucket_oc]
+}
 resource "aws_s3_bucket_public_access_block" "logging_bucket_pab" {
   bucket = aws_s3_bucket.logging_bucket.id
   block_public_acls       = true
