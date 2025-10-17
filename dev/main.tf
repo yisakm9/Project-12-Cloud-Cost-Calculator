@@ -39,13 +39,13 @@ module "cost_report_function" {
   source_code_path    = abspath("${path.root}/../src/lambda/get_cost_report/")
   depends_on          = [module.ses_email_identity]
   schedule_expression = var.lambda_schedule
-  sender_email        = var.notification_email  # Using the same email  for sender/receiver
-  recipient_email     = var.notification_email
-  kms_key_arn = module.lambda_kms_key.key_arn
+  kms_key_arn         = module.lambda_kms_key.key_arn
+  
   environment_variables = {
-      SENDER_EMAIL    = var.notification_email
-      RECIPIENT_EMAIL = var.notification_email
+    SENDER_EMAIL    = var.notification_email
+    RECIPIENT_EMAIL = var.notification_email
   }
+  
   tags = {
     Project   = "CloudCostCalculator"
     ManagedBy = "Terraform"
