@@ -66,11 +66,7 @@ module "ses_email_identity" {
 
 module "cost_dashboard_bucket" {
   source                 = "./modules/s3"
-  bucket_name            = "${var.s3_bucket_name_prefix}-${random_id.suffix.hex}"
-  cloudfront_oai_iam_arn = module.cloudfront_distribution.oai_iam_arn
-
-  
-  # --- ADD THIS LINE ---
+  bucket_name            = "${var.s3_bucket_name_prefix}-${random_id.suffix.hex}"  
   logging_bucket_id      = aws_s3_bucket.logging_bucket.id
 
   tags = {
@@ -164,6 +160,7 @@ module "cloudfront_distribution" {
 # --- ADD THIS NEW RESOURCE BLOCK ---
 # This bucket policy is now in the root module, where it can access outputs
 # from both the S3 and CloudFront modules, breaking the dependency cycle.
+# It lives in the root module to break the dependency cycle.
 resource "aws_s3_bucket_policy" "dashboard_bucket_policy" {
   bucket = module.cost_dashboard_bucket.bucket_name
   policy = jsonencode({
@@ -173,9 +170,11 @@ resource "aws_s3_bucket_policy" "dashboard_bucket_policy" {
         Sid       = "AllowCloudFrontOAI",
         Effect    = "Allow",
         Principal = {
+          # It gets the OAI ARN from the CloudFront module's output
           AWS = module.cloudfront_distribution.oai_iam_arn
         },
         Action    = "s3:GetObject",
+        # It gets the bucket ARN from the S3 module's output
         Resource  = "${module.cost_dashboard_bucket.bucket_arn}/*"
       }
     ]

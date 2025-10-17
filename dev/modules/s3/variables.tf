@@ -13,8 +13,3 @@ variable "logging_bucket_id" {
   description = "The ID of the S3 bucket to use for access logging."
   type        = string
 }
-
- variable "cloudfront_oai_iam_arn" {
-   description = "The IAM ARN of the CloudFront Origin Access Identity to grant read access."
-   type        = string
- }
