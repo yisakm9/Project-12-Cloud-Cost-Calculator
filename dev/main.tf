@@ -1,9 +1,4 @@
 
-# Dynamically discover the AWS Account ID of the caller.
-data "aws_caller_identity" "current" {}
-
-# Dynamically discover the AWS Region from the provider configuration.
-data "aws_region" "current" {}
 
 resource "random_id" "suffix" {
   byte_length = 4 # Generates an 8-character hex string
