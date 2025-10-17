@@ -114,8 +114,7 @@ module "cost_api" {
   api_name               = var.api_name
   lambda_integration_arn = module.get_cost_api_function.function_arn
   
-  aws_account_id         = data.aws_caller_identity.current.account_id
-  aws_region             = data.aws_region.current.id # Use .id instead of .name
+  
   log_group_kms_key_arn  = module.logs_kms_key.key_arn
   tags = {
     Project   = "CloudCostCalculator"

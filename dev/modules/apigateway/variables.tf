@@ -15,15 +15,7 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
-variable "aws_account_id" {
-  description = "The AWS Account ID where the resources are deployed."
-  type        = string
-}
 
-variable "aws_region" {
-  description = "The AWS Region where the resources are deployed."
-  type        = string
-}
 variable "log_group_kms_key_arn" {
   description = "The ARN of the KMS key to use for encrypting the log group."
   type        = string
