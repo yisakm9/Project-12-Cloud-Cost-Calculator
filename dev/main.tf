@@ -121,11 +121,17 @@ module "lambda_kms_key" {
   source      = "./modules/kms"
   alias_name  = "lambda-env-key"
   description = "KMS key for encrypting Lambda environment variables"
-  tags        = { Project = "CloudCostCalculator" }
+  # allow_cloudwatch_logs is false by default, which is correct for this key.
+  tags = { Project = "CloudCostCalculator" }
 }
+
 module "logs_kms_key" {
   source      = "./modules/kms"
   alias_name  = "cloudwatch-logs-key"
   description = "KMS key for encrypting CloudWatch log groups"
-  tags        = { Project = "CloudCostCalculator" }
+  
+  # Explicitly enable the policy statement for CloudWatch Logs.
+  allow_cloudwatch_logs = true
+  
+  tags = { Project = "CloudCostCalculator" }
 }

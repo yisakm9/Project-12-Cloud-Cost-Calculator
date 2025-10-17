@@ -1,52 +1,58 @@
 # dev/modules/kms/main.tf
 
+# These data sources are needed to dynamically build the policy ARN.
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
-resource "aws_kms_key" "this" {
-  description             = var.description
-  deletion_window_in_days = 7
-  enable_key_rotation     = true
-  # Add the policy argument
-  policy                  = data.aws_iam_policy_document.kms_policy.json
-  tags                    = var.tags
-}
-
-resource "aws_kms_alias" "this" {
-  name          = "alias/${var.alias_name}"
-  target_key_id = aws_kms_key.this.id
-}
-
-# --- ADD THIS DATA SOURCE AND RESOURCE ---
+# This data source constructs the IAM policy document in memory.
 data "aws_iam_policy_document" "kms_policy" {
-  # Base policy allowing root user full access
+  # Statement 1: Default policy that gives the root user of the account full control over the key.
   statement {
     sid       = "EnableIAMUserPermissions"
     actions   = ["kms:*"]
     resources = ["*"]
+
     principals {
       type        = "AWS"
       identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
     }
   }
 
-  # Conditionally add the statement for CloudWatch Logs
+  # Statement 2 (Conditional): If allow_cloudwatch_logs is true, add this statement.
   dynamic "statement" {
     for_each = var.allow_cloudwatch_logs ? [1] : []
+
     content {
-      sid = "AllowCloudwatchLogs"
+      sid = "AllowCloudwatchLogsService"
       actions = [
         "kms:Encrypt*",
         "kms:Decrypt*",
         "kms:ReEncrypt*",
         "kms:GenerateDataKey*",
-        "kms:Describe*"
+        "kms:DescribeKey"
       ]
-      resources = ["*"] # Must be "*" for these actions
+      resources = ["*"] # KMS requires "*" for these specific actions.
+
       principals {
-        type        = "Service"
-        identifiers = ["logs.${data.aws_region.current.name}.amazonaws.com"]
+        type = "Service"
+        # --- THE FIX IS HERE: Use .id instead of .name ---
+        identifiers = ["logs.${data.aws_region.current.id}.amazonaws.com"]
       }
     }
   }
+}
+
+# The KMS Key resource itself.
+resource "aws_kms_key" "this" {
+  description             = var.description
+  deletion_window_in_days = 7
+  enable_key_rotation     = true
+  policy                  = data.aws_iam_policy_document.kms_policy.json
+  tags                    = var.tags
+}
+
+# The alias for the KMS key, making it easier to reference.
+resource "aws_kms_alias" "this" {
+  name          = "alias/${var.alias_name}"
+  target_key_id = aws_kms_key.this.id
 }
