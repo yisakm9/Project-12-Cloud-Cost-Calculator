@@ -147,8 +147,6 @@ module "sqs_kms_key" {
 module "cloudfront_distribution" {
   source                         = "./modules/cloudfront"
   s3_bucket_regional_domain_name = module.cost_dashboard_bucket.bucket_regional_domain_name
-  s3_bucket_arn                  = module.cost_dashboard_bucket.bucket_arn
-  
   tags = {
     Project   = "CloudCostCalculator"
     ManagedBy = "Terraform"
