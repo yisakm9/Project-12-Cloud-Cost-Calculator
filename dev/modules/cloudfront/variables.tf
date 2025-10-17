@@ -9,3 +9,7 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+variable "logging_bucket_domain_name" {
+  description = "The domain name of the S3 bucket for access logs."
+  type        = string
+}

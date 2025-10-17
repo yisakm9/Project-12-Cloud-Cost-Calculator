@@ -65,14 +65,18 @@ module "ses_email_identity" {
 }
 
 module "cost_dashboard_bucket" {
-  source = "./modules/s3"
-  bucket_name = "${var.s3_bucket_name_prefix}-${random_id.suffix.hex}"  
+  source                 = "./modules/s3"
+  bucket_name            = "${var.s3_bucket_name_prefix}-${random_id.suffix.hex}"
+  cloudfront_oai_iam_arn = module.cloudfront_distribution.oai_iam_arn
+  
+  # --- ADD THIS LINE ---
+  logging_bucket_id      = aws_s3_bucket.logging_bucket.id
+
   tags = {
     Project   = "CloudCostCalculator"
     ManagedBy = "Terraform"
   }
 }
-
 #      IAM module for a different purpose
 module "api_lambda_execution_role" {
   source      = "./modules/iam"
@@ -146,6 +150,7 @@ module "sqs_kms_key" {
 module "cloudfront_distribution" {
   source                         = "./modules/cloudfront"
   s3_bucket_regional_domain_name = module.cost_dashboard_bucket.bucket_regional_domain_name
+  logging_bucket_domain_name     = aws_s3_bucket.logging_bucket.bucket_regional_domain_name
   tags = {
     Project   = "CloudCostCalculator"
     ManagedBy = "Terraform"
@@ -174,4 +179,23 @@ resource "aws_s3_bucket_policy" "dashboard_bucket_policy" {
       }
     ]
   })
+}
+# --- ADD THIS NEW S3 BUCKET FOR LOGS ---
+resource "aws_s3_bucket" "logging_bucket" {
+  #checkov:skip=CKV_AWS_18:This is the logging bucket, it cannot log to itself.
+  #checkov:skip=CKV_AWS_21:Versioning is not required for a log bucket.
+  #checkov:skip=CKV_AWS_145:Default encryption is sufficient for this log bucket.
+  bucket = "cost-calculator-logs-${random_id.suffix.hex}"
+  tags = {
+    Project   = "CloudCostCalculator"
+    ManagedBy = "Terraform"
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "logging_bucket_pab" {
+  bucket = aws_s3_bucket.logging_bucket.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }

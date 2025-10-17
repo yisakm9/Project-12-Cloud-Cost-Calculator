@@ -19,7 +19,7 @@ resource "aws_apigatewayv2_api" "this" {
 resource "aws_cloudwatch_log_group" "api_logs" {
   name              = "/aws/apigateway/${var.api_name}"
   # CKV_AWS_338: Correct the retention period to 30 days.
-  retention_in_days = 30
+  retention_in_days = 365
    # CKV_AWS_158: Encrypt the log group with the default AWS-managed key for logs.
   kms_key_id = var.log_group_kms_key_arn
   tags              = var.tags

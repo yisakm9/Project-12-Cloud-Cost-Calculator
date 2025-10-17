@@ -5,6 +5,10 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 # This data source constructs the IAM policy document in memory.
+# Add suppression comments for the overly permissive root user policy.
+#checkov:skip=CKV_AWS_109:Default root user access is an accepted risk for this project's key policy.
+#checkov:skip=CKV_AWS_111:Default root user access is an accepted risk for this project's key policy.
+#checkov:skip=CKV_AWS_356:Default root user access is an accepted risk for this project's key policy.
 data "aws_iam_policy_document" "kms_policy" {
   # Statement 1: Default policy that gives the root user of the account full control over the key.
   statement {

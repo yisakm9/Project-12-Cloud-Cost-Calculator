@@ -9,3 +9,7 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+variable "logging_bucket_id" {
+  description = "The ID of the S3 bucket to use for access logging."
+  type        = string
+}

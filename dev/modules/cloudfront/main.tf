@@ -5,7 +5,11 @@ resource "aws_cloudfront_origin_access_identity" "oai" {
   comment = "OAI for the cost calculator dashboard S3 bucket"
 }
 
-# The CloudFront distribution. This is the public-facing CDN.
+# The CloudFront distribution, now with security and logging best practices applied.
+# Suppression comments are added for findings that are accepted risks for this project's scope.
+#checkov:skip=CKV_AWS_68:WAF is a production-level requirement and is out of scope for this project.
+#checkov:skip=CKV_AWS_374:Geo-restriction is not required as this is a globally accessible demo dashboard.
+#checkov:skip=CKV_AWS_310:Origin failover is an advanced availability pattern not required for this project.
 resource "aws_cloudfront_distribution" "this" {
   enabled             = true
   is_ipv6_enabled     = true
@@ -23,13 +27,19 @@ resource "aws_cloudfront_distribution" "this" {
     }
   }
 
+  # CKV_AWS_86: Add logging configuration to send access logs to a dedicated S3 bucket.
+  logging_config {
+    include_cookies = false
+    bucket          = var.logging_bucket_domain_name
+    prefix          = "cloudfront/"
+  }
+
   # Default cache behavior: how requests are handled.
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD"]
     cached_methods   = ["GET", "HEAD"]
     target_origin_id = "S3-${var.s3_bucket_regional_domain_name}"
 
-    # Standard caching policy for web assets.
     viewer_protocol_policy = "redirect-to-https"
     min_ttl                = 0
     default_ttl            = 3600
@@ -43,9 +53,10 @@ resource "aws_cloudfront_distribution" "this" {
     }
   }
 
-  # Viewer certificate configuration for HTTPS.
+  # CKV_AWS_174: Enforce a modern TLS security policy.
   viewer_certificate {
     cloudfront_default_certificate = true
+    minimum_protocol_version       = "TLSv1.2_2021"
   }
 
   # Restrictions for the distribution.
@@ -57,4 +68,3 @@ resource "aws_cloudfront_distribution" "this" {
 
   tags = var.tags
 }
-
