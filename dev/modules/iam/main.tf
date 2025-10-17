@@ -20,7 +20,6 @@ resource "aws_iam_role" "lambda_exec_role" {
 }
 
 # Defines the permissions policy for our Lambda function.
-# It grants access to Cost Explorer and allows writing logs to CloudWatch.
 resource "aws_iam_policy" "lambda_permissions_policy" {
   name        = var.policy_name
   description = var.policy_description
@@ -43,15 +42,20 @@ resource "aws_iam_policy" "lambda_permissions_policy" {
         ],
         Resource = "arn:aws:logs:*:*:*"
       },
-       # This block grants the Lambda function permission to send emails
-      # using the specified SES identity.
       {
         Effect   = "Allow",
         Action   = "ses:SendEmail",
-        Resource = "arn:aws:ses:us-east-1:*:identity/*" # This is a reasonable scope
-        # For stricter security in production, you could scope this down to the specific
-        # identity ARN: "arn:aws:ses:us-east-1:ACCOUNT_ID:identity/your-email@example.com"
+        Resource = "arn:aws:ses:us-east-1:*:identity/*"
+      },
+      # --- ADD THIS NEW PERMISSION BLOCK ---
+      # This grants the Lambda function permission to send messages to any SQS queue.
+      # This permission is required for the Dead Letter Queue (DLQ) functionality to work.
+      {
+        Effect   = "Allow",
+        Action   = "sqs:SendMessage",
+        Resource = "*" # Scoped to all SQS queues for this project's simplicity.
       }
+      # --- END ADDITION ---
     ]
   })
   tags = var.tags
