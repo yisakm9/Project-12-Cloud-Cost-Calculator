@@ -25,7 +25,6 @@ output "ses_verified_email_arn" {
   value       = module.ses_email_identity.identity_arn
 }
 
-# The dashboard URL is now the domain name of the CloudFront distribution.
 output "dashboard_url" {
   description = "The HTTPS URL for the cost calculator dashboard, served via CloudFront."
   # We prepend "https://" to make it a full, clickable URL in the output.

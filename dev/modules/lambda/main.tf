@@ -57,10 +57,8 @@ resource "aws_lambda_function" "this" {
   tags        = var.tags
 }
 
-# --- Resources for Scheduled (Cron) Triggers ---
-
 resource "aws_cloudwatch_event_rule" "lambda_schedule" {
-  # Only create this resource if a schedule expression is provided.
+  
   count               = var.schedule_expression != null ? 1 : 0
   name                = "${var.function_name}-schedule"
   description         = "Triggers the Lambda function on a schedule"
@@ -69,7 +67,7 @@ resource "aws_cloudwatch_event_rule" "lambda_schedule" {
 }
 
 resource "aws_cloudwatch_event_target" "lambda_target" {
-  # Only create this resource if a schedule is provided.
+  
   count     = var.schedule_expression != null ? 1 : 0
   rule      = aws_cloudwatch_event_rule.lambda_schedule[0].name
   target_id = var.function_name
@@ -77,7 +75,7 @@ resource "aws_cloudwatch_event_target" "lambda_target" {
 }
 
 resource "aws_lambda_permission" "allow_cloudwatch" {
-  # Only create this resource if a schedule is provided.
+  
   count         = var.schedule_expression != null ? 1 : 0
   statement_id  = "AllowExecutionFromCloudWatch"
   action        = "lambda:InvokeFunction"

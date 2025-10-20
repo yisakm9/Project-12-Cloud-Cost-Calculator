@@ -41,7 +41,6 @@ variable "lambda_schedule" {
   default     = "cron(0 9 ? * MON *)" # Every Monday at 9:00 AM UTC
   #default     = "rate(2 minutes)"  # for test
 }
-# New variable for the S3 bucket name
 variable "s3_bucket_name_prefix" {
   description = "The prefix for the S3 bucket name. A random suffix will be appended to ensure uniqueness."
   type        = string

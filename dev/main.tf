@@ -1,6 +1,6 @@
 
 resource "random_id" "suffix" {
-  byte_length = 4 # Generates an 8-character hex string
+  byte_length = 4 
 }
 
 module "cost_alerting_topic" {
@@ -74,7 +74,7 @@ module "cost_dashboard_bucket" {
     ManagedBy = "Terraform"
   }
 }
-#  IAM module for a different purpose
+
 module "api_lambda_execution_role" {
   source      = "./modules/iam"
   role_name   = var.api_lambda_iam_role_name
@@ -86,7 +86,7 @@ module "api_lambda_execution_role" {
   }
 }
 
-# NEW LAMBDA FUNCTION FOR THE API 
+# LAMBDA FUNCTION FOR THE API 
 module "get_cost_api_function" {
   source              = "./modules/lambda"
   function_name       = var.api_lambda_function_name
@@ -96,21 +96,18 @@ module "get_cost_api_function" {
   sqs_kms_key_arn     = module.sqs_kms_key.key_arn
   schedule_expression = null 
   
-  # The invalid arguments are removed.
-  # No `environment_variables` argument is needed because the default empty map is sufficient.
+  
   
   tags = {
     Project   = "CloudCostCalculator"
     ManagedBy = "Terraform"
   }
 }
-#  NEW API GATEWAY RESOURCE 
+
 module "cost_api" {
   source                 = "./modules/apigateway"
   api_name               = var.api_name
-  lambda_integration_arn = module.get_cost_api_function.function_arn
-  
-  
+  lambda_integration_arn = module.get_cost_api_function.function_arn  
   log_group_kms_key_arn  = module.logs_kms_key.key_arn
   tags = {
     Project   = "CloudCostCalculator"
@@ -122,7 +119,6 @@ module "lambda_kms_key" {
   source      = "./modules/kms"
   alias_name  = "lambda-env-key"
   description = "KMS key for encrypting Lambda environment variables"
-  # allow_cloudwatch_logs is false by default, which is correct for this key.
   tags = { Project = "CloudCostCalculator" }
 }
 
@@ -143,7 +139,7 @@ module "sqs_kms_key" {
   tags        = { Project = "CloudCostCalculator" }
 }
 
-# Create the CloudFront distribution
+
 module "cloudfront_distribution" {
   source                         = "./modules/cloudfront"
   s3_bucket_regional_domain_name = module.cost_dashboard_bucket.bucket_regional_domain_name
@@ -153,11 +149,11 @@ module "cloudfront_distribution" {
     ManagedBy = "Terraform"
   }
 
-  # Explicitly tell Terraform to create the S3 bucket before the CloudFront distribution
+  
   depends_on = [module.cost_dashboard_bucket]
 }
 
-# --- ADD THIS NEW RESOURCE BLOCK ---
+
 # This bucket policy is now in the root module, where it can access outputs
 # from both the S3 and CloudFront modules, breaking the dependency cycle.
 # It lives in the root module to break the dependency cycle.
@@ -180,7 +176,7 @@ resource "aws_s3_bucket_policy" "dashboard_bucket_policy" {
     ]
   })
 }
-# --- ADD THIS NEW S3 BUCKET FOR LOGS ---
+
 resource "aws_s3_bucket" "logging_bucket" {
   #checkov:skip=CKV_AWS_18:This is the logging bucket, it cannot log to itself.
   #checkov:skip=CKV_AWS_21:Versioning is not required for a log bucket.

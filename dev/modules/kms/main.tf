@@ -35,11 +35,11 @@ data "aws_iam_policy_document" "kms_policy" {
         "kms:GenerateDataKey*",
         "kms:DescribeKey"
       ]
-      resources = ["*"] # KMS requires "*" for these specific actions.
+      resources = ["*"] 
 
       principals {
         type = "Service"
-        # --- THE FIX IS HERE: Use .id instead of .name ---
+        
         identifiers = ["logs.${data.aws_region.current.id}.amazonaws.com"]
       }
     }

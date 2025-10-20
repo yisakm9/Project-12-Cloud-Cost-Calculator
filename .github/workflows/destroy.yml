@@ -23,7 +23,7 @@ jobs:
     env:
       TF_WORKING_DIR: 'dev'
       AWS_REGION: 'us-east-1'
-      # IMPORTANT: Update with your AWS Account ID and the Role name you created
+      # AWS Account ID and the Role name 
       AWS_ROLE_ARN: arn:aws:iam::456202167790:role/githubaction
 
       # Define the confirmation phrase as an environment variable for clarity
@@ -31,9 +31,9 @@ jobs:
 
     steps:
       - name: 'Checkout Code'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 
 
-      # --- YOUR EXPLICIT VERIFICATION STEP ---
+      
       - name: 'Verify Destroy Confirmation'
         run: |
           echo "Verifying confirmation input..."
@@ -43,8 +43,7 @@ jobs:
           else
             echo "✅ Confirmation phrase matches. Proceeding with destroy operation."
           fi
-      # --- END VERIFICATION STEP ---
-
+      
       - name: 'Configure AWS Credentials'
         uses: aws-actions/configure-aws-credentials@v4
         with:

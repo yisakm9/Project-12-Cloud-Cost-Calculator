@@ -1,4 +1,4 @@
-# environments/dev/providers.tf
+# environments/dev/versions.tf
 terraform {
   backend "s3" {
     bucket       = "ysak-terraform-state-bucket"
@@ -7,7 +7,7 @@ terraform {
     encrypt      = true
     use_lockfile = true
   }  
- # dev/versions.tf
+ 
 }
 # This block defines the version constraints for Terraform itself and its providers.
 terraform {
@@ -25,8 +25,7 @@ terraform {
   }
 }
 
-# The provider configuration block is separate and stands on its own.
 provider "aws" {
-  # The region is static for this project due to billing metrics.
+  
   region = "us-east-1"
 }

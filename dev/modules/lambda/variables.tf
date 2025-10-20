@@ -45,7 +45,7 @@ variable "kms_key_arn" {
   type        = string
   default     = null # Make it optional
 }
-# Also update the environment variables to be a map
+
 variable "environment_variables" {
   description = "A map of environment variables for the Lambda function."
   type        = map(string)

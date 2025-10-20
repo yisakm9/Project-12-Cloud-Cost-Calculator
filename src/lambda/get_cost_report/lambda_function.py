@@ -12,7 +12,7 @@ ses = boto3.client('ses', region_name='us-east-1')
 SENDER_EMAIL = os.environ.get('SENDER_EMAIL')
 RECIPIENT_EMAIL = os.environ.get('RECIPIENT_EMAIL')
 
-# --- NEW MAPPING DICTIONARY ---
+# MAPPING DICTIONARY 
 # This dictionary maps the technical service names from Cost Explorer to user-friendly names.
 # You can add more services here as you see them in your reports.
 SERVICE_MAPPINGS = {
@@ -165,7 +165,7 @@ def lambda_handler(event, context):
     This function fetches the AWS cost and usage report for the last 7 days
     and sends a summary email using SES.
     """
-    # ... (the rest of this function remains unchanged) ...
+    
     if not SENDER_EMAIL or not RECIPIENT_EMAIL:
         return {'statusCode': 400, 'body': 'Environment variables not set.'}
     end_date = datetime.now()
@@ -202,12 +202,12 @@ def _create_email_body(response, start_date, end_date):
 
     for service, cost in sorted_services:
         if cost > 0:
-            # --- APPLY THE MAPPING ---
+            #   THE MAPPING 
             # Use the dictionary's .get() method for a safe lookup.
             # If the service name isn't in our map, it uses the original name as a fallback.
             friendly_name = SERVICE_MAPPINGS.get(service, service)
             report_lines.append(f"<tr><td>{friendly_name}</td><td style='text-align:right;'>{cost:.2f}</td></tr>")
-            # --- END CHANGE ---
+            
     
     report_lines.append(f"<tr><td style='font-weight:bold;'>Total Estimated Cost</td><td style='text-align:right; font-weight:bold;'>${total_cost:.2f}</td></tr>")
     report_lines.append("</table></body></html>")
@@ -215,6 +215,6 @@ def _create_email_body(response, start_date, end_date):
 
 def _send_email(body, start_date, end_date):
     """Sends an email using Amazon SES."""
-    # ... (this function remains unchanged) ...
+   
     subject = f"AWS Weekly Cost Report: {start_date} to {end_date}"
     ses.send_email(Source=SENDER_EMAIL, Destination={'ToAddresses': [RECIPIENT_EMAIL]}, Message={'Subject': {'Data': subject}, 'Body': {'Html': {'Data': body}}})

@@ -25,7 +25,7 @@ resource "aws_cloudwatch_log_group" "api_logs" {
   tags              = var.tags
 }
 
-# The default stage for the API, now with access logging configured.
+
 resource "aws_apigatewayv2_stage" "default" {
   api_id      = aws_apigatewayv2_api.this.id
   name        = "$default"
@@ -34,7 +34,7 @@ resource "aws_apigatewayv2_stage" "default" {
   # CKV_AWS_76: Enable access logging for the stage.
   access_log_settings {
     destination_arn = aws_cloudwatch_log_group.api_logs.arn
-    # A standard JSON log format for access logs.
+    
     format = jsonencode({
       requestId               = "$context.requestId"
       sourceIp                = "$context.identity.sourceIp"

@@ -50,7 +50,7 @@ resource "aws_iam_policy" "lambda_permissions_policy" {
         Action   = "ses:SendEmail",
         Resource = "arn:aws:ses:us-east-1:*:identity/*"
       },
-      # --- UPDATED PERMISSION BLOCK FOR DLQ ---
+      
       # This conditionally grants permission to send messages ONLY to the specific SQS DLQ.
       # This resolves CKV_AWS_290 and CKV_AWS_355.
       {
@@ -59,7 +59,7 @@ resource "aws_iam_policy" "lambda_permissions_policy" {
         Action   = "sqs:SendMessage",
         Resource = var.sqs_dlq_arn
       }
-      # --- END UPDATE ---
+      
     ]
   })
   tags = var.tags

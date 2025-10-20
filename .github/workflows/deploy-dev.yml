@@ -23,7 +23,7 @@ jobs:
     env:
       TF_WORKING_DIR: 'dev'
       AWS_REGION: 'us-east-1'
-      # IMPORTANT: Update with your AWS Account ID and the Role name you created
+      #  AWS Account ID and the Role name 
       AWS_ROLE_ARN: arn:aws:iam::456202167790:role/githubaction
 
     # Expose outputs to be used by other jobs in the workflow
@@ -44,7 +44,7 @@ jobs:
       - name: 'Setup Terraform'
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: '1.13.4' # Pinning version for consistency
+          terraform_version: '1.13.4' #  version for consistency
 
       - name: 'Setup TFLint'
         uses: terraform-linters/setup-tflint@v6
@@ -61,11 +61,11 @@ jobs:
           directory: ${{ env.TF_WORKING_DIR }}
           framework: terraform
           # soft_fail: true allows the pipeline to continue while still reporting findings.
-          # For a strict production pipeline, set this to 'false'.
+          # For  production pipeline, set this to 'false'.
           soft_fail: true
 
       - name: 'Terraform Init'
-        id: init
+        id: initiation
         run: terraform init
         working-directory: ${{ env.TF_WORKING_DIR }}
 
