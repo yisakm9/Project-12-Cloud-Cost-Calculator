@@ -86,7 +86,7 @@ module "api_lambda_execution_role" {
   }
 }
 
-# LAMBDA FUNCTION FOR THE API 
+#  LAMBDA FUNCTION FOR THE API 
 module "get_cost_api_function" {
   source              = "./modules/lambda"
   function_name       = var.api_lambda_function_name
