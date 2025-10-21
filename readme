@@ -3,7 +3,7 @@
 
 > An end-to-end, serverless web application that provides real-time AWS cost monitoring, budget alerting, and a dynamic frontend dashboard. This project is fully managed by Infrastructure as Code (Terraform) and deployed via a professional CI/CD pipeline with integrated security scanning.
 
-![AWS Cost Dashboard Screenshot](./dashboard  Screenshot.png) 
+
 
 
 # The Problem
@@ -124,6 +124,7 @@ graph TD
 │       ├── kms/
 │       ├── lambda/
 │       ├── s3/
+│       ├── sns/
 │       └── ses/
 ├── frontend/                  # Contains the static website files
 │   └── public/
